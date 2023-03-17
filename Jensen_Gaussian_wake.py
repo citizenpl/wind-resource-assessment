@@ -17,7 +17,7 @@ from sklearn.pipeline import make_pipeline
 ##height  %%for the moloch model it is only the altitude above sea level (add 50, 80 and 100m)
 
 ## issued according to point_coord names
-##Moloch model points altitude and height agl
+##mesoscale model points altitude and height agl
 
 Alt_point=float(10)
 Hmodel=np.array([50,80,100])
@@ -35,16 +35,16 @@ H_hub=np.array([135,165,170])
 H_wstation=float(10)
 Agl_wstation=float(5)
 
-##Read and write EAA and station data
+##Read and write mesoscale and station data
 
 date1=datetime(2020,8,4)
 date2=datetime(2021,12,31)
 date_generated=pd.date_range(start=date1 , end=date2)
 # print(date_generated.strftime("%y%m%d"))
 
-directory="C:/Users/plgeo/OneDrive/PC Desktop/FARIA/DATA EAA/Moloch_data"
-directory_stations= "C:/Users/plgeo/OneDrive/PC Desktop/FARIA/DATA EAA/weather_station_data"
-directory_to_save="C:/Users/plgeo/OneDrive/PC Desktop/FARIA/IASMOS results/"
+directory="C:/Users/
+directory_stations= "C:/Users/weather_station_data"
+directory_to_save="C:/Users/plgeo/OneDrive/PC Desktop/"
 
 EAA_file1=directory+"/"+"points_EAA.xlsx"
 point_directory=directory+"/l"
@@ -317,7 +317,7 @@ Model_data = np.column_stack([Timestamp_model, W_50, W_80, W_100, D_50, D_80,D_1
 
 ##weather station data
 
-directory_stations="C:/Users/plgeo/OneDrive/PC Desktop/FARIA/DATA EAA/weather_station_data"
+directory_stations="C:/Users/plgeo/OneDrive/PC Desktop/weather_station_data"
 station_name=["igoumenitsa","stratoni","asprovalta","imeros"]
 station_coord=[[39.541749,20.279882]];station_coord.append([40.515033,23.828907]);station_coord.append([40.724931,23.711809]);station_coord.append([40.955700,25.369020])
 
@@ -429,10 +429,10 @@ WTG_mast=np.array([41.098639,25.208333],dtype='f')# location of met mast in deci
 
 ##read and process wind mast raw data
 
-directory_mast='C:/Users/plgeo/OneDrive/PC Desktop/FARIA/IASMOS new mast data/'
+directory_mast='C:/Users/PC Desktop/ new mast data/'
 
 ##find and use all folders containing mast raw data
-folderlabel='IASMOS_RAWDATA_'
+folderlabel='_RAWDATA_'
 folderstamps=os.listdir(directory_mast)
 folderstamps=[fold for fold in folderstamps if fold[0:len(folderlabel)]==folderlabel]
 
@@ -844,8 +844,8 @@ L=0.0065 ## mean temperature lapse rate in lower troposphere in oC/m
 Zc=0.99996 ## compressibility factor of the atmospheric air
 Rad=6535*(10**3) ## earth's radius in m
 
-moloch_coord=point.split('_')
-moloch_coord=np.array(moloch_coord,dtype=float)
+mol_coord=point.split('_')
+mol_coord=np.array(mol_coord,dtype=float)
 WTG_coord = WTG_coord_Iasmos
 WTG_alt = Alt_Iasmos
 station_info = Station_data
@@ -853,8 +853,8 @@ st_coord = station_coord[3]
 st_alt = H_wstation
 href = Agl_wstation
 zo = float(0.05)#roughness length, provide 2 different versions , i.e. 0.05 and 0.10
-lat_model = moloch_coord[0]
-lon_model = moloch_coord[1]
+lat_model = mol_coord[0]
+lon_model = mol_coord[1]
 
 ##derivation of mean wind from 3 old mast mean data at the position of the moloch model using spatial interpolation with inverse distance weighting
 point_old1=[41.11245,25.04727];point_old2=[41.11563,25.11530];point_old3=[41.11503,25.01637]
@@ -878,7 +878,7 @@ Wmean=statistics.mean([Wmean_year1,Wmean_year2])
 
 lat_station = st_coord[0]
 lon_station = st_coord[1]
-moloch_data = Model_data
+mol_data = Model_data
 station_data = station_info[1:, :]  # this is going to skip first row, remember this is a numpy array
 # print(station_data.shape)##check to see how many rows does each timeseries have ( how many timestamps) by checking no of rows and cols
 station_timestamp = station_data[:, 0]  ##access of first column of numpy array
@@ -932,30 +932,30 @@ station_meanw2021 = np.mean(station_w2021, dtype=float)
 station_sdvw2021 = np.std(station_w2021, dtype=float)
 station_cl2020 = [station_meanw2020, station_sdvw2020]  ##gives station climate  at 10m agl
 station_cl2021 = [station_meanw2021, station_sdvw2021]  ##gives station climate  at 10m agl
-moloch_timestamp_help=list(moloch_data[:,0])
+mol_timestamp_help=list(mol_data[:,0])
 # convert from one date format to another using datetime object.
-moloch_timestamp = []
-for x in moloch_timestamp_help:
+mol_timestamp = []
+for x in mol_timestamp_help:
     if len(x) > 16:
-       moloch_date = datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
-       y = moloch_date.strftime("%Y-%m-%d %H:%M")
+       mol_date = datetime.strptime(x, "%Y-%m-%d %H:%M:%S")
+       y = mol_date.strftime("%Y-%m-%d %H:%M")
     else:
        y = x
-    moloch_timestamp.append(y)
-del moloch_timestamp_help
+    mol_timestamp.append(y)
+del mol_timestamp_help
 index_model_end=[]
-for k in range(len(moloch_timestamp)):
-    m_ts = moloch_timestamp[k]
+for k in range(len(mol_timestamp)):
+    m_ts = mol_timestamp[k]
     if m_ts==station_timestamp_end:
        index_model_end.append(k)
 ## correlation between station wind speed and model wind speed overall and per direction sector
 index_model_end = index_model_end[0]
 # print(index_model_end)
-moloch_timestamp_help = moloch_timestamp[0:index_model_end + 1]
-moloch_wspeed = moloch_data[0:index_model_end + 1, 1:4]
-moloch_dir = moloch_data[0:index_model_end + 1, 4:7]
-moloch_dir_help = moloch_dir[:, 0]
-moloch_dir_help = list(moloch_dir_help)
+mol_timestamp_help = mol_timestamp[0:index_model_end + 1]
+mol_wspeed = mol_data[0:index_model_end + 1, 1:4]
+mol_dir = mol_data[0:index_model_end + 1, 4:7]
+mol_dir_help = mol_dir[:, 0]
+mol_dir_help = list(mol_dir_help)
 # finds all elements of station_timestamps that exist in moloch_timestamps
 ##and creates a common timeseries for correlation and analysis. Also it upscales the station wind speed at 100m agl
 station_timestamp_help = list(station_timestamp_help)
@@ -963,35 +963,35 @@ station_wspeed_for_common = station_data[index_start:index_end, 3]
 station_wspeed_for_common = list(station_wspeed_for_common)
 station_wcommon = [];
 station_wcommon_up = [];
-moloch_wcommon = [];
-moloch_dcommon = []
+wcommon = [];
+dcommon = []
 index_common = []
 for l in range(len(station_timestamp_help)):
     st_help = station_timestamp_help[l]
-    if st_help in moloch_timestamp_help:
-       ic = moloch_timestamp_help.index(st_help)
+    if st_help in mol_timestamp_help:
+       ic = mol_timestamp_help.index(st_help)
        if ic < len(station_wspeed_for_common):
          st_c = station_wspeed_for_common[ic]
          station_wcommon.append(st_c)
          w_up = np.array(st_c, dtype=float) * (math.log(hup / zo) / math.log(href / zo))  ##upscales station wind speed at 100m agl
          station_wcommon_up.append(w_up)
-         mol_c = moloch_wspeed[ic, :]
-         mold_c = moloch_dir_help[ic]
-         moloch_wcommon.append(mol_c)
-         moloch_dcommon.append(mold_c)
+         mol_c = wspeed[ic, :]
+         mold_c = dir_help[ic]
+         wcommon.append(mol_c)
+         dcommon.append(mold_c)
          index_common.append(ic)
 station_wc = np.array(station_wcommon, dtype=float)
 station_wc_up = np.array(station_wcommon_up, dtype=float)
 station_common_up_mean = np.mean(station_wc_up)
-moloch_wcommon = np.array(moloch_wcommon, dtype=float)
+wcommon = np.array(wcommon, dtype=float)
 
-moloch_wcommon_50m = list(moloch_wcommon[:, 0])
-moloch_wcommon_80m = list(moloch_wcommon[:, 1])
-moloch_wcommon_100m = list(moloch_wcommon[:, 2])
+wcommon_50m = list(mol_wcommon[:, 0])
+wcommon_80m = list(mol_wcommon[:, 1])
+wcommon_100m = list(mol_wcommon[:, 2])
 
 input_dirm = []
 labels=16
-for zz in moloch_dcommon:
+for zz in mol_dcommon:
     z_help = float(zz)
     input_dirm.append(z_help)
 clusters_m, centroids_m = kmeans1d.cluster(input_dirm,labels)  ##cluster wind direction of moloch model to 16 sectors with kmeans algorithm, centroids are the class centre and clusters are the sector number of each element, total 16
@@ -1003,30 +1003,30 @@ for ii in range(len(centroids_m)):
        if class_d == ii:
           index_d.append(jj)
 # print(index_d)
-    moloch_wcommon_per_sector_50m = [];
-    moloch_wcommon_per_sector_80m = [];
-    moloch_wcommon_per_sector_100m = [];
+    mol_wcommon_per_sector_50m = [];
+    mol_wcommon_per_sector_80m = [];
+    mol_wcommon_per_sector_100m = [];
     station_wcommon_per_sector = [];
-    moloch_dcommon_per_sector = [];
+    mol_dcommon_per_sector = [];
     station_wcommon_up_per_sector = []
     for xx in index_d:
-        moloch_wc_ps50 = moloch_wcommon_50m[xx]
-        moloch_wc_ps80 = moloch_wcommon_80m[xx]
-        moloch_wc_ps100 = moloch_wcommon_100m[xx]
-        moloch_dc = input_dirm[xx]
+        mol_wc_ps50 = mol_wcommon_50m[xx]
+        mol_wc_ps80 = mol_wcommon_80m[xx]
+        mol_wc_ps100 = mol_wcommon_100m[xx]
+        mol_dc = input_dirm[xx]
         station_wc_ps = station_wcommon[xx]
         station_wc_ps_up = station_wcommon_up[xx]
-        moloch_wcommon_per_sector_50m.append(moloch_wc_ps50)
-        moloch_wcommon_per_sector_80m.append(moloch_wc_ps80)
-        moloch_wcommon_per_sector_100m.append(moloch_wc_ps100)
+        mol_wcommon_per_sector_50m.append(mol_wc_ps50)
+        mol_wcommon_per_sector_80m.append(mol_wc_ps80)
+        mol_wcommon_per_sector_100m.append(mol_wc_ps100)
         station_wcommon_per_sector.append(station_wc_ps)
         station_wcommon_up_per_sector.append(station_wc_ps_up)
-        moloch_dcommon_per_sector.append(moloch_dc)
+        mol_dcommon_per_sector.append(mol_dc)
     dclass_perc = len(index_d) / len(station_wcommon)  ##percentage of wind direction per sector
-    ## fit a linear regression model to the log of the moloch wind speed to derive wind shear per sector
-    list_w50m_nn = [x1 + float(1.1) if x1 < 1.1 else x1 for x1 in moloch_wcommon_per_sector_50m]  ## exclude zeros or negative natural logarithms.
-    list_w80m_nn = [x2 + float(1.1) if x2 < 1.1 else x2 for x2 in moloch_wcommon_per_sector_80m]
-    list_w100m_nn = [x3 + float(1.1) if x3 < 1.1 else x3 for x3 in moloch_wcommon_per_sector_100m]
+    ## fit a linear regression model to the log of the mol wind speed to derive wind shear per sector
+    list_w50m_nn = [x1 + float(1.1) if x1 < 1.1 else x1 for x1 in mol_wcommon_per_sector_50m]  ## exclude zeros or negative natural logarithms.
+    list_w80m_nn = [x2 + float(1.1) if x2 < 1.1 else x2 for x2 in mol_wcommon_per_sector_80m]
+    list_w100m_nn = [x3 + float(1.1) if x3 < 1.1 else x3 for x3 in mol_wcommon_per_sector_100m]
     log_w50 = np.log(list_w50m_nn, dtype=float)
     log_w80 = np.log(list_w80m_nn, dtype=float)
     log_w100 = np.log(list_w100m_nn, dtype=float)
@@ -1046,9 +1046,9 @@ for ii in range(len(centroids_m)):
     s_shmodelerror1 = math.sqrt((1 - rsqm1) * (s_mlog ** 2))
     s_shmodelerror2 = math.sqrt((1 - rsqm2) * (s_mlog ** 2))
     s_shmodelerror = statistics.mean([s_shmodelerror1, s_shmodelerror2])  ## standard deviation of the shear factor fitting error.
-    wcom50 = np.mean(moloch_wcommon_per_sector_50m, dtype=float)
-    wcom80 = np.mean(moloch_wcommon_per_sector_80m, dtype=float)
-    wcom100 = np.mean(moloch_wcommon_per_sector_100m, dtype=float)
+    wcom50 = np.mean(mol_wcommon_per_sector_50m, dtype=float)
+    wcom80 = np.mean(mol_wcommon_per_sector_80m, dtype=float)
+    wcom100 = np.mean(mol_wcommon_per_sector_100m, dtype=float)
     Dclass_perc_station.append(dclass_perc)  ##list of wind direction sector percentage of data
     mean_dclass = min(moloch_dcommon_per_sector)  ##the minimum direction of each direction class, used in order to classify station direction
     S_shmodelerror.append(s_shmodelerror)
@@ -1143,25 +1143,25 @@ del exist_count
 del index_d
 del mean_dclass
 
-moloch_wspeed_help = moloch_wspeed[:, 2];
-moloch_wspeed_help = moloch_wspeed_help.astype('f')
+mol_wspeed_help = mol_wspeed[:, 2];
+mol_wspeed_help = mol_wspeed_help.astype('f')
 
 ##choose the timeseries with the highest mean wind speed in the common available time interval
-mean_moloch_speed = statistics.mean(moloch_wspeed_help)
-mean_recreated_speed = statistics.mean(Wind_model_up[-1 - len(moloch_wspeed_help) + 1:])
+mean_mol_speed = statistics.mean(mol_wspeed_help)
+mean_recreated_speed = statistics.mean(Wind_model_up[-1 - len(mol_wspeed_help) + 1:])
 
-def myfunc1(moloch_wspeed_help):
-    Wind_model_up[-1 - len(moloch_wspeed_help) + 1:] = list(moloch_wspeed_help)
+def myfunc1(mol_wspeed_help):
+    Wind_model_up[-1 - len(mol_wspeed_help) + 1:] = list(mol_wspeed_help)
 
 def myfunc2():
     return
 
-if mean_moloch_speed > mean_recreated_speed:
-    myfunc1(moloch_wspeed_help)
+if mean_mol_speed > mean_recreated_speed:
+    myfunc1(mol_wspeed_help)
 else:
     myfunc2()
 
-Dir_model[-1 - len(moloch_wspeed_help) + 1:] = list(moloch_dir_help)##replaces station wind dir with moloch wind dir for the existing Moloch model timestamps
+Dir_model[-1 - len(mol_wspeed_help) + 1:] = list(mol_dir_help)##replaces station wind dir with mol wind dir for the existing Mol model timestamps
 
 std_measure=float(0.017)## anemometer measurement uncertainty  as an stdev in m/s
 
@@ -1295,7 +1295,7 @@ RR=D/2 ## rotor radius in [m]
 ## filetosave='C:/Users/plgeo/OneDrive/Υπολογιστής/FARIA/Preliminary_wind_resource_assessment.xlsx'
 
 ## wind to power conversion - includes downstream wind speed derived from thrust curve and modified Jensen model
-directory_power_curve='C:/Users/plgeo/OneDrive/PC Desktop/FARIA/Wind turbine type/';
+directory_power_curve='C:/Users/plgeo/OneDrive/PC Desktop/Wind turbine type/';
 file_curve=directory_power_curve+'SG_turbine_characteristics.xlsx'
 NUM_curve= pd.read_excel(file_curve,sheet_name='power curve')
 NUM_thrust=pd.read_excel(file_curve,sheet_name='Thrust coef')
